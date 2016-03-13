@@ -19,8 +19,12 @@ function initialise()
 
 function run()
 {
-	sourcecode = document.getElementById("id_sourceocde").value.split("");
+	sourcecode = document.getElementById("id_sourceocde").value.split("\n");
 	alert(sourcecode);
+	for (var r = 0; r < sourcecode.length; ++r)
+	{
+		alert(sourcecode[r].length);
+	}
 	const animate = document.getElementById("id_animate").value;
 	
 	row = 0;
@@ -73,6 +77,7 @@ function step()
 				break;
 			default:
 				//crash
+				alert("died from a " + sourcecode[row][col] + " :(");
 				return false;
 		}
 	}
@@ -83,12 +88,14 @@ function step()
 			break;
 		case Dir.EAST:
 			++col;
+			break;
 		case Dir.WEST:
 			--col;
+			break;
 		case Dir.SOUTH:
 			++row;
+			break;
 	}
-	alert("x = " + col + ";  y = " + row);
 	return true;
 }
 
