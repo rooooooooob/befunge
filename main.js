@@ -10,9 +10,12 @@ const Dir = {
 var row;
 var col;
 var dir;
+var stack;
+var stringMode;
 var sourcecode;
 var originalSource;
 var animId;
+var output;
 
 function initialise()
 {
@@ -22,13 +25,16 @@ function initialise()
 function run()
 {
 	var sourcebox = document.getElementById("id_sourcecode");
-	originalSource = sourcebox.value;
+	originalSource = sourcebox.value.slice();
 	sourcecode = originalSource.split("\n");
 	const animate = document.getElementById("id_animate").value;
 	
 	row = 0;
 	col = 0;
 	dir = Dir.EAST;
+	stack = []
+	stringMode = false;
+	output = "";
 	
 	if (animate)
 	{
@@ -49,6 +55,7 @@ function stop()
 	document.getElementById("id_sourcecode").value = originalSource;
 	document.getElementById("id_runbutton").disabled = false;
 	document.getElementById("id_stopbutton").disabled = true
+	alert(output); // @todo add a text area to display to
 }
 
 function animatedStep()
@@ -77,29 +84,137 @@ function step()
 	// it's an empty spot
 	if (col < sourcecode[row].length)
 	{
-		switch (sourcecode[row][col])
+		const c = sourcecode[row][col];
+		if (c >= '0' && c < '9')
 		{
-			case ' ':
-				// empty space - just keep walking
-				break;
-			case '^':
-				dir = Dir.NORTH;
-				break;
-			case '>':
-				dir = Dir.EAST;
-				break;
-			case '<':
-				dir = Dir.WEST;
-				break;
-			case 'v':
-				dir = Dir.SOUTH;
-				break;
-			case '@': // end program
-				return false;
-			default:
-				//crash
-				//alert("died from a " + sourcecode[row][col] + " :(");
-				//return false;
+			stack.push(Number(c));
+		}
+		else if (stringMode)
+		{
+			if (c == '\"')
+			{
+				stringMode = false;
+			}
+			else
+			{
+				stack.push(c.charCodeAt());
+			}
+		}
+		else
+		{
+			switch (c)
+			{
+				case ' ':
+					// empty space - just keep walking
+					break;
+				case '^':
+					dir = Dir.NORTH;
+					break;
+				case '>':
+					dir = Dir.EAST;
+					break;
+				case '<':
+					dir = Dir.WEST;
+					break;
+				case 'v':
+					dir = Dir.SOUTH;
+					break;
+				case '@': // end program
+					return false;
+				case '+':
+					stack.push(stack.pop() + stack.pop());
+					break;
+				case '-':
+					stack.push(stack.pop() - stack.pop());
+					break;
+				case '*':
+					stack.push(stack.pop() * stack.pop());
+					break;
+				case '/':
+					const a = stack.pop();
+					const b = stack.pop();
+					if (a == 0)
+					{
+						// ask user input
+						alert("/ when a == 0 unimplemented");
+					}
+					else
+					{
+						stack.push(Math.floor(b / a));
+					}
+					break;
+				case '%':
+					a = stack.pop();
+					b = stack.pop();
+					if (a == 0)
+					{
+						// ask user input
+						alert("% when a == 0 unimplemented");
+					}
+					else
+					{
+						stack.push(Math.floor(b % a));
+					}
+					break;
+				case '!':
+					stack.push(stack.pop() == 0 ? 1 : 0);
+					break;
+				case '`':
+					stack.push(stack.pop() < stack.pop() ? 1 : 0);
+					break;
+				case '?':
+					// move randomly
+					alert("? unimplemented");
+					break;
+				case '_':
+					dir = (stack.pop() == 0) ? Dir.EAST : Dir.WEST;
+					break;
+				case '|':
+					dir = (stack.pop() == 0) ? Dir.SOUTH : Dir.NORTH;
+					break;
+				case '\"':
+					// assert(stringMode == false)
+					stringMode = true;
+					break;
+				case ':':
+					stack.push(stack[stack.length - 1]);
+					break;
+				case '\\':
+					a = stack.pop();
+					b = stack.pop();
+					stack.push(a);
+					stack.push(b);
+					break;
+				case '$':
+					stack.pop();
+					break;
+				case '.':
+					output += stack.pop().toString();
+					break;
+				case ',':
+					output += String.fromCharCode(stack.pop());
+					break;
+				case '#':
+					// skip next cell?
+					alert("# unimplemented");
+					break;
+				case 'p':
+					alert("p unimplemented");
+					break;
+				case 'g':
+					alert("g unimplemented");
+					break;
+				case '&':
+					alert("& unimplemented");
+					break;
+				case '~':
+					alert("~ unimplemented");
+					break;
+				default:
+					crash
+					alert("died from a " + sourcecode[row][col] + " :(");
+					return false;
+			}
 		}
 	}
 	switch (dir)
@@ -123,25 +238,25 @@ function step()
 function render()
 {
 	var sourcebox = document.getElementById("id_sourcecode");
-	var output = "";
+	var viewCode = "Output: " + output + "\nStack: " + stack + "\nSourcode:\n";
 	for (var r = 0; r < sourcecode.length; ++r)
 	{
 		for (var c = 0; c < 80; ++c)
 		{
 			if (r == row && c == col)
 			{
-				output += '@';
+				viewCode += '@';
 			}
 			else if (c < sourcecode[r].length)
 			{
-				output += sourcecode[r][c];
+				viewCode += sourcecode[r][c];
 			}
 			else
 			{
-				output += ' '
+				viewCode += ' ';
 			}
 		}
-		output += '\n';
+		viewCode += '\n';
 	}
-	sourcebox.value = output;
+	sourcebox.value = viewCode;
 }
