@@ -40,7 +40,7 @@ function run()
 	{
 		document.getElementById("id_runbutton").disabled = true;
 		document.getElementById("id_stopbutton").disabled = false;
-		animId = setInterval(animatedStep, 75);
+		animId = setInterval(animatedStep, 100);
 	}
 	else
 	{
@@ -55,7 +55,6 @@ function stop()
 	document.getElementById("id_sourcecode").value = originalSource;
 	document.getElementById("id_runbutton").disabled = false;
 	document.getElementById("id_stopbutton").disabled = true
-	alert(output); // @todo add a text area to display to
 }
 
 function animatedStep()
@@ -238,7 +237,7 @@ function step()
 function render()
 {
 	var sourcebox = document.getElementById("id_sourcecode");
-	var viewCode = "Output: " + output + "\nStack: " + stack + "\nSourcode:\n";
+	var viewCode = "";
 	for (var r = 0; r < sourcecode.length; ++r)
 	{
 		for (var c = 0; c < 80; ++c)
@@ -259,4 +258,5 @@ function render()
 		viewCode += '\n';
 	}
 	sourcebox.value = viewCode;
+	document.getElementById("id_output").value = "Stack: [" + stack + "]\nOutput:\n" + output;
 }
