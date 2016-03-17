@@ -84,7 +84,7 @@ function step()
 	if (col < sourcecode[row].length)
 	{
 		const c = sourcecode[row][col];
-		if (c >= '0' && c < '9')
+		if (c >= '0' && c <= '9')
 		{
 			stack.push(Number(c));
 		}
