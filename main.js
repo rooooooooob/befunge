@@ -86,7 +86,7 @@ function step()
 		const c = sourcecode[row][col];
 		if (c >= '0' && c <= '9')
 		{
-			stack.push(Number(c));
+			push(Number(c));
 		}
 		else if (stringMode)
 		{
@@ -96,7 +96,7 @@ function step()
 			}
 			else
 			{
-				stack.push(c.charCodeAt());
+				push(c.charCodeAt());
 			}
 		}
 		else
@@ -121,43 +121,43 @@ function step()
 				case '@': // end program
 					return false;
 				case '+':
-					stack.push(stack.pop() + stack.pop());
+					push(pop() + pop());
 					break;
 				case '-':
-					stack.push(stack.pop() - stack.pop());
+					push(pop() - pop());
 					break;
 				case '*':
-					stack.push(stack.pop() * stack.pop());
+					push(pop() * pop());
 					break;
 				case '/':
-					const a = stack.pop();
-					const b = stack.pop();
+					const a = pop();
+					const b = pop();
 					if (a == 0)
 					{
-						stack.push(userNumberInput());
+						push(userNumberInput());
 					}
 					else
 					{
-						stack.push(Math.floor(b / a));
+						push(Math.floor(b / a));
 					}
 					break;
 				case '%':
-					a = stack.pop();
-					b = stack.pop();
+					a = pop();
+					b = pop();
 					if (a == 0)
 					{
-						stack.push(userNumberInput());
+						push(userNumberInput());
 					}
 					else
 					{
-						stack.push(Math.floor(b % a));
+						push(Math.floor(b % a));
 					}
 					break;
 				case '!':
-					stack.push(stack.pop() == 0 ? 1 : 0);
+					push(pop() == 0 ? 1 : 0);
 					break;
 				case '`':
-					stack.push(stack.pop() < stack.pop() ? 1 : 0);
+					push(pop() < pop() ? 1 : 0);
 					break;
 				case '?':
 					const r = Math.floor(Math.random() * 4);
@@ -180,52 +180,54 @@ function step()
 					}
 					break;
 				case '_':
-					dir = (stack.pop() == 0) ? Dir.EAST : Dir.WEST;
+					dir = (pop() == 0) ? Dir.EAST : Dir.WEST;
 					break;
 				case '|':
-					dir = (stack.pop() == 0) ? Dir.SOUTH : Dir.NORTH;
+					dir = (pop() == 0) ? Dir.SOUTH : Dir.NORTH;
 					break;
 				case '\"':
 					// assert(stringMode == false)
 					stringMode = true;
 					break;
 				case ':':
-					stack.push(stack[stack.length - 1]);
+					const dup = pop();
+					push(dup);
+					push(dup);
 					break;
 				case '\\':
-					a = stack.pop();
-					b = stack.pop();
-					stack.push(a);
-					stack.push(b);
+					a = pop();
+					b = pop();
+					push(a);
+					push(b);
 					break;
 				case '$':
-					stack.pop();
+					pop();
 					break;
 				case '.':
-					output += stack.pop().toString();
+					output += pop().toString();
 					break;
 				case ',':
-					output += String.fromCharCode(stack.pop());
+					output += String.fromCharCode(pop());
 					break;
 				case '#':
 					move();
 					break;
 				case 'p':
-					const y = stack.pop();
-					const x = stack.pop();
-					const v = stack.pop();
+					const y = pop();
+					const x = pop();
+					const v = pop();
 					sourcecode[y][x] = String.fromCharCode(v);
 					break;
 				case 'g':
-					y = stack.pop();
-					x = stack.pop();
-					stack.push(sourcecode[y][x].charCodeAt());
+					y = pop();
+					x = pop();
+					push(sourcecode[y][x].charCodeAt());
 					break;
 				case '&':
-					stack.push(userNumberInput());
+					push(userNumberInput());
 					break;
 				case '~':
-					stack.push(userCharInput().charCodeAt());
+					push(userCharInput().charCodeAt());
 					break;
 				default:
 					alert("died from a " + sourcecode[row][col] + " :(");
@@ -235,6 +237,21 @@ function step()
 	}
 	move();
 	return true;
+}
+
+function pop()
+{
+	if (stack.length == 0)
+	{
+		// this is the compliant behaviour for a befunge interpreter
+		return 0;
+	}
+	return stack.pop();
+}
+
+function push(e)
+{
+	stack.push(e);
 }
 
 function move()
