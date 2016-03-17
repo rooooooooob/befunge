@@ -134,8 +134,7 @@ function step()
 					const b = stack.pop();
 					if (a == 0)
 					{
-						// ask user input
-						alert("/ when a == 0 unimplemented");
+						stack.push(userNumberInput());
 					}
 					else
 					{
@@ -147,8 +146,7 @@ function step()
 					b = stack.pop();
 					if (a == 0)
 					{
-						// ask user input
-						alert("% when a == 0 unimplemented");
+						stack.push(userNumberInput());
 					}
 					else
 					{
@@ -162,8 +160,24 @@ function step()
 					stack.push(stack.pop() < stack.pop() ? 1 : 0);
 					break;
 				case '?':
-					// move randomly
-					alert("? unimplemented");
+					const r = Math.floor(Math.random() * 4);
+					switch (r)
+					{
+						case 0:
+							dir = Dir.NORTH;
+							break;
+						case 1:
+							dir = Dir.EAST;
+							break;
+						case 2:
+							dir = Dir.WEST;
+							break;
+						case 3:
+							dir = Dir.SOUTH;
+							break;
+						default:
+							alert("invalid random number");
+					}
 					break;
 				case '_':
 					dir = (stack.pop() == 0) ? Dir.EAST : Dir.WEST;
@@ -194,28 +208,37 @@ function step()
 					output += String.fromCharCode(stack.pop());
 					break;
 				case '#':
-					// skip next cell?
-					alert("# unimplemented");
+					move();
 					break;
 				case 'p':
-					alert("p unimplemented");
+					const y = stack.pop();
+					const x = stack.pop();
+					const v = stack.pop();
+					sourcecode[y][x] = String.fromCharCode(v);
 					break;
 				case 'g':
-					alert("g unimplemented");
+					y = stack.pop();
+					x = stack.pop();
+					stack.push(sourcecode[y][x].charCodeAt());
 					break;
 				case '&':
-					alert("& unimplemented");
+					stack.push(userNumberInput());
 					break;
 				case '~':
-					alert("~ unimplemented");
+					stack.push(userCharInput().charCodeAt());
 					break;
 				default:
-					crash
 					alert("died from a " + sourcecode[row][col] + " :(");
 					return false;
 			}
 		}
 	}
+	move();
+	return true;
+}
+
+function move()
+{
 	switch (dir)
 	{
 		case Dir.NORTH:
@@ -231,7 +254,6 @@ function step()
 			++row;
 			break;
 	}
-	return true;
 }
 
 function render()
@@ -259,4 +281,23 @@ function render()
 	}
 	sourcebox.value = viewCode;
 	document.getElementById("id_output").value = "Stack: [" + stack + "]\nOutput:\n" + output;
+}
+
+// pulls from input queue, or if empty, 
+function userNumberInput()
+{
+	// @TODO pull from queue instead of always querying
+	var number;
+	do
+	{
+		number = Number(prompt("Enter value", ""));
+	}
+	while (Number.isNaN(number));
+	return number;
+}
+
+function userCharInput()
+{
+	// @todo implement
+	return '!'
 }
